@@ -28,16 +28,18 @@ class GenericMDP:
         V_k = np.zeros(action_space) 
 
         for action in range(action_space):
-            V_k[action] = self.rewards[state][action] + self.discount_rate * \
-                          sum(self.probabilities[state][action][s_prime] * values_dict.get(s_prime, 0) \
+            V_k[action] = sum(self.rewards[state][action][s_prime] + self.discount_rate * \
+                          self.probabilities[state][action][s_prime] * values_dict.get(s_prime, 0) \
                           for s_prime in self.probabilities[state][action])
             
         return max(V_k) 
 
     def _value_iteration(self):
-        '''value iteration function which we have to 
+        '''
+        value iteration function which we have to 
         
-        soon, this will need termination conditions'''
+        soon, this will need termination conditions
+        '''
 
         V_k = {}   
         k = 0
@@ -45,7 +47,7 @@ class GenericMDP:
             V_k_minus_1 = V_k.copy()
             for state in self.states:
                 V_k[state] = self._bellmans_eq(state = state, values_dict = V_k_minus_1)
-                
+
             k += 1
         return V_k
     
