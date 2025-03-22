@@ -127,27 +127,3 @@ class GenericMDP:
         if self.problem_type == 'gridworld':
             self._policy_plotter()
         return self.policy, self.values
-
-
-
-class MDPConstructor:
-    '''here we can contain all of the helper functions which will allow us to make the transition matricies we need'''
-    def __init__(self, problem_type, **kwargs):
-        self.problem_type = problem_type
-        self.border_penalty = kwargs.get('border_penalty', -1)
-        self.reward_states = kwargs.get('reward_states', None)
-
-
-    def _grid_world(self):
-        '''class to populate everything in the case of a grid world example'''
-        probabilities, rewards = None, None
-        return probabilities, rewards
-
-    def _misc(self):
-        '''in the case of a non grid world problem, we still need to make it so that we have probabilities specified in 
-        some reasonable fashion'''
-        pass
-
-    def __call__(self, problem_type):
-        '''the idea here is to funnel you down to the correct constructors'''
-
