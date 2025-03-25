@@ -97,7 +97,7 @@ class Gridworld_Constructor:
                 else:
                     new_state = (new_row, new_col)
 
-                value = -1 if new_state == state else 0
+                value = self.border_penalty if new_state == state else 0
                 sub_dirs[index][new_state] = value
 
         return sub_dirs

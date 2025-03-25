@@ -1,7 +1,7 @@
 import ast
 
-from Gridworld_Constructor import Gridworld_Constructor
-from MDP import GenericMDP
+from .Gridworld_Constructor import Gridworld_Constructor
+from .MDP import GenericMDP
 
 
 
@@ -11,7 +11,7 @@ def Value_Iteration():
     problem_type_validity = False
     
     while not problem_type_validity:
-        problem_type = input("Enter 'Gridworld', or 'Other':  ").strip()
+        problem_type = input("Enter 'Gridworld', or 'Other' (no quotation marks):  ").strip()
         if problem_type.lower() == "gridworld":
             problem_type_validity = True
             gridworld_helper_func()
@@ -57,7 +57,7 @@ def gridworld_helper_func():
             ):
                 reward_cells_validity = True
             else:
-                print(f"Invalid coordinates. Ensure tuples are within (0 ≤ x < {len_x}, 0 ≤ y < {len_y}).")
+                print(f"Invalid coordinates. Ensure tuples are within (0 ≤ x < {len_x-1}, 0 ≤ y < {len_y-1}).")
         
         except (SyntaxError, ValueError, TypeError):
             print("Invalid input. Enter coordinates as [(x1, y1), (x2, y2), ...].")
@@ -169,7 +169,8 @@ def gridworld_helper_func():
                         probabilities = probabilities, 
                         rewards = rewards, 
                         discount_rate = discount_rate, 
-                        max_iterations = max_iterations, 
+                        max_iterations = max_iterations,
+                        tolerance=tolerance, 
                         len_x = dimensions[0], 
                         len_y = dimensions[1], 
                         reward_list = reward_cells, 
@@ -242,8 +243,8 @@ def generic_helper_func():
 
                         # If all checks pass, store the result
                         temp2 = {
-                            states[0]: p_float,
-                            states[1]: p_complement,
+                            states[0]: round(p_float, 4),
+                            states[1]: round(p_complement, 4),
                         }
                         temp[index] = temp2
                         break  # exit the while loop
@@ -378,4 +379,3 @@ def generic_helper_func():
                         rewards = rewards, 
                         discount_rate = discount_rate, 
                         max_iterations = max_iterations)()
-

@@ -7,7 +7,7 @@ from .MDP import GenericMDP
 
 def Value_Iteration():
     print("\n")
-    print("Welcome to the MDP Solver. Is this a GridWorld problem?", flush=True)
+    print("Welcome to the MDP Solver! Is this a GridWorld problem?", flush=True)
     problem_type_validity = False
     
     while not problem_type_validity:
@@ -27,7 +27,7 @@ def gridworld_helper_func():
     # Get grid dimensions
     dimension_type_validity = False
     while not dimension_type_validity:
-        print("\n")
+        print("\nConfigure Gridworld dimensions and rewards")
         dimensions = input("Enter GridWorld dimensions as [len_x, len_y]: ").strip()
         try:
             dimensions = dimensions.strip("[]")
@@ -45,7 +45,6 @@ def gridworld_helper_func():
     # Get reward cells (list of tuples)
     reward_cells_validity = False
     while not reward_cells_validity:
-        print("\n")
         reward_cells = input(f"Enter reward cell coordinates as [(x1, y1), (x2, y2), ...]. Grid size is {len_x}x{len_y}. Use zero indexing: ").strip()
         try:
             reward_cells = eval(reward_cells)  # Convert to list of tuples
@@ -82,6 +81,7 @@ def gridworld_helper_func():
     # Get edge penalty (negative number)
     edge_penalty_validity = False
     while not edge_penalty_validity:
+        print("\nEdge penalties and probability of missstep")
         edge_penalty = input("Enter the edge penalty (negative number): ").strip()
         try:
             edge_penalty = float(edge_penalty)
@@ -112,6 +112,7 @@ def gridworld_helper_func():
     # Get max iterations (positive integer)
     max_iterations_validity = False
     while not max_iterations_validity:
+        print("\nInput solver parameters")
         max_iterations = input("Enter the maximum number of iterations (positive integer): ").strip()
         try:
             max_iterations = int(max_iterations)
@@ -186,7 +187,7 @@ def generic_helper_func():
 
     # Get state space
     while True:
-        print("\n")
+        print("\nDefine States and Actions")
         states = input("Name available states as ['state_1', 'state_2', ...]: ").strip()
         try:
             states = ast.literal_eval(states)
@@ -199,7 +200,6 @@ def generic_helper_func():
 
     # Get action space
     while True:
-        print("\n")
         actions = input("Name available actions as ['action_1', 'action_2']: ").strip()
         try:
             actions = ast.literal_eval(actions)
@@ -214,7 +214,7 @@ def generic_helper_func():
     print("Actions:", actions)
 
     probabilities = {}
-
+    print("\nNow define transition probabilties")
     if len(states) == 2:
         for s in states: 
             temp = {}
@@ -234,17 +234,17 @@ def generic_helper_func():
 
                         # The sum for 2 states is forced to 1
                         # state[1] = 1 - p_float
-                        p_complement = 1.0 - p_float
+                        p_complement = round(1.0 - p_float, 4)
                         if not (0 <= p_complement <= 1):
                             raise ValueError(
                                 "Calculated complement is not between 0 and 1, "
                                 "check your value."
                             )
-
+                        print(f"Probability for transition from state {s} to {states[1]} following action {action} defaulted to {p_complement}")
                         # If all checks pass, store the result
                         temp2 = {
-                            states[0]: p_float,
-                            states[1]: p_complement,
+                            states[0]: round(p_float, 4),
+                            states[1]: round(p_complement, 4),
                         }
                         temp[index] = temp2
                         break  # exit the while loop
@@ -285,8 +285,8 @@ def generic_helper_func():
                         continue
 
                     # Now check if sum of probabilities is 1
-                    # (we allow a small tolerance, e.g. 1e-8)
-                    if abs(total_probability - 1.0) > 1e-8:
+                    # (we allow a small tolerance, e.g. 1e-5)
+                    if abs(total_probability - 1.0) > 1e-5:
                         print(
                             f"The sum of the probabilities you entered is "
                             f"{total_probability:.5f}, which does not equal 1. "
@@ -300,10 +300,10 @@ def generic_helper_func():
 
             probabilities[s] = temp
 
-    print("\nFinal Probabilities Dictionary:\n", probabilities)
+    print("Final Probabilities Dictionary:\n", probabilities)
     rewards = {}
 
-
+    print("\nNow define rewards")
     for s in states:
         temp = {}
         for index, action in enumerate(actions):
@@ -330,11 +330,12 @@ def generic_helper_func():
         # Finally, store the dictionary for this state
         rewards[s] = temp
 
-    # Debug print
-    print("\nFinal Rewards Dictionary:")
+    print("Final Rewards Dictionary:")
     print(rewards)
     # Get max iterations (positive integer)
     max_iterations_validity = False
+    print("\nInput solver parameters")
+
     while not max_iterations_validity:
         max_iterations = input("Enter the maximum number of iterations (positive integer): ").strip()
         try:
@@ -371,12 +372,13 @@ def generic_helper_func():
                 print("Discount rate must be in the range [0, 1).")
         except ValueError:
             print("Invalid input. Enter a float between 0 and 1 (e.g., 0.9).")
-    print('\n Extracted policy is: ')
-    print('\n')
+    print('\nMDP Successfully initialised, solving in progess')
+
     solver = GenericMDP(states = states, 
                         actions = actions, 
                         probabilities = probabilities, 
                         rewards = rewards, 
                         discount_rate = discount_rate, 
-                        max_iterations = max_iterations)()
+                        max_iterations = max_iterations, 
+                        tolerance = tolerance)()
 
