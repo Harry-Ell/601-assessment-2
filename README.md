@@ -5,7 +5,7 @@ In this package, we provide an implementation of a value iteration solving algor
 ## Installing from github with pip:
 
 ```bash
-pip install git+https://github.com/Harry-Ell/601-assessment-2.git#subdirectory=.package/value_iteration
+pip install git+https://github.com/Harry-Ell/601-assessment-2.git#subdirectory=.package
 
 ```
 
