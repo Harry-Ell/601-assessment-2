@@ -7,7 +7,7 @@ There is actually a large amount of overhead to doing this, hence this is going 
 
 import numpy as np
 from numpy.testing import assert_array_equal
-from value_iteration.MDP import GenericMDP
+from value_iteration.MDP import GenericMDP #type: ignore
 
 def populate_probabilities_rewards(state, actions, corners):
     sub_dirs = {}

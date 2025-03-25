@@ -3,7 +3,7 @@ Python test file for exercise 9.27
 """
 import numpy as np
 from numpy.testing import assert_array_equal
-from value_iteration.MDP import GenericMDP
+from value_iteration.MDP import GenericMDP #type: ignore
 
 # for 9.27, we simply write out what we know the tarket policy should be 
 def test_ex_9_27():
