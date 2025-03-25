@@ -4,24 +4,36 @@ import matplotlib.pyplot as plt
 
 class GenericMDP:
 
-    def __init__(self, states, actions, probabilities, rewards, discount_rate, max_iterations, len_x, len_y, reward_list, reward_values, problem_type = 'generic'):
-        self.len_x = len_x
-        self.len_y = len_y
+    def __init__(self, 
+                 states, 
+                 actions, 
+                 probabilities, 
+                 rewards, 
+                 discount_rate, 
+                 max_iterations,
+                 tolerance = 1e-6, 
+                 len_x = None, 
+                 len_y = None, 
+                 reward_list = None, 
+                 reward_values = None, 
+                 problem_type = 'generic'):
+
+        self.tolerance = tolerance
         self.states = states
         self.actions = actions
         self.probabilities = probabilities
         self.discount_rate = discount_rate
         self.max_iter = max_iterations
         self.rewards_dict = rewards
-        self.rewards_list = reward_list
-        self.reward_values = reward_values
         self.problem_type = problem_type
-        # self.problem_type = problem_type
 
-        # # in the case of a grid world
-        # self.border_penalty = kwargs.get('border_penalty', -1)
-        # self.other = kwargs.get('other', -1)
-        # self.other_other = kwargs.get('other', -1)
+        if self.problem_type == 'gridworld':
+            self.len_x = len_x
+            self.len_y = len_y
+            self.rewards_list = reward_list
+            self.rewards_list = reward_list
+            self.reward_values = reward_values
+
 
 
     def _bellmans_eq(self, state, values_dict:dict, extract_policy = False):
@@ -59,9 +71,16 @@ class GenericMDP:
             for state in self.states:
                 V_k[state] = self._bellmans_eq(state = state, values_dict = V_k_minus_1)
             k += 1
+            # lets see if we have reached tolerance, only after doing multiple iterations through incase of a slow start 
+            if k > 10:
+                value_change = sum(abs(V_k[k] - V_k_minus_1[k]) for k in V_k)
+                if value_change/ len(V_k) < self.tolerance:
+                    print(f'Tolerance of {self.tolerance} was met after {k} iterations. Terminating now.')
+                    return V_k
+        print(f'Tolerance of {self.tolerance} was not met after {self.max_iter} iterations. Terminating now.')
         return V_k
     
-    def _extract_policy(self):
+    def _extract_policy_gridworld(self):
         '''
         Description: 
             We will only do this once as to reduce computational load on the solver
@@ -76,6 +95,21 @@ class GenericMDP:
             policy[state] = self._bellmans_eq(state = state, values_dict = Values, extract_policy=True)
         return policy
     
+    def _extract_policy_generic(self):
+        '''
+        Description: 
+            We will only do this once as to reduce computational load on the solver
+        Inputs: 
+            Value function
+        Returns: 
+            Policy
+        '''
+        Values = self.values
+        policy = {}
+        for state in self.states:
+            policy[state] = self._bellmans_eq(state = state, values_dict = Values, extract_policy=True)
+            print(f'If in state: {state}, the optimal action is: {self.actions[int(policy[state][0][0])]}')
+        return policy
 
     def _policy_plotter(self):
         arrow_map = {
@@ -123,7 +157,10 @@ class GenericMDP:
     def __call__(self):
         '''call funciton'''
         self.values = self._value_iteration()
-        self.policy = self._extract_policy()
         if self.problem_type == 'gridworld':
+            self.policy = self._extract_policy_gridworld()
             self._policy_plotter()
+        else:
+            self.policy = self._extract_policy_generic()
+
         return self.policy, self.values

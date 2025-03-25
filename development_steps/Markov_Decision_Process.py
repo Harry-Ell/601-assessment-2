@@ -1,3 +1,5 @@
+import ast
+
 from Gridworld_Constructor import Gridworld_Constructor
 from MDP import GenericMDP
 
@@ -15,7 +17,7 @@ def Value_Iteration():
             gridworld_helper_func()
         elif problem_type.lower() == 'other':
             problem_type_validity = True
-            print("Unsupported problem type.")
+            generic_helper_func()
         else:
             print("Please check spelling of problem type.")
 
@@ -106,7 +108,8 @@ def gridworld_helper_func():
             print("Invalid input. Enter a number between 0 and 1.")
 
     print(f"Probability of misstep set to: {probability_of_misstep}")
-    # ✅ Get max iterations (positive integer)
+
+    # Get max iterations (positive integer)
     max_iterations_validity = False
     while not max_iterations_validity:
         max_iterations = input("Enter the maximum number of iterations (positive integer): ").strip()
@@ -171,11 +174,208 @@ def gridworld_helper_func():
                         len_y = dimensions[1], 
                         reward_list = reward_cells, 
                         reward_values = reward_values, 
-                        problem_type = 'gridworld')
+                        problem_type = 'gridworld')()
 
 
-if __name__ == "__main__":
-    Value_Iteration()
 
-           
+
+
+def generic_helper_func():
+    """CLI for collecting all inputs required to specify a general mdp"""
+
+    # Get state space
+    while True:
+        print("\n")
+        states = input("Name available states as ['state_1', 'state_2', ...]: ").strip()
+        try:
+            states = ast.literal_eval(states)
+            if isinstance(states, list) and all(isinstance(x, str) for x in states):
+                break
+            else:
+                print("Ensure your input is a list of strings, e.g. ['Healthy', 'Sick', ...]")
+        except (ValueError, SyntaxError):
+            print("Invalid input. Use the format ['Healthy', 'Sick']")
+
+    # Get action space
+    while True:
+        print("\n")
+        actions = input("Name available actions as ['action_1', 'action_2']: ").strip()
+        try:
+            actions = ast.literal_eval(actions)
+            if isinstance(actions, list) and all(isinstance(x, str) for x in actions):
+                break
+            else:
+                print("Ensure your input is a list of strings, e.g. ['Run', 'Walk']")
+        except (ValueError, SyntaxError):
+            print("Invalid input. Use the format ['Run', 'Walk']")
+
+    print("States:", states)
+    print("Actions:", actions)
+
+    probabilities = {}
+
+    if len(states) == 2:
+        for s in states: 
+            temp = {}
+            for index, action in enumerate(actions):
+                while True:
+                    try:
+                        probability = input(
+                            f"If in state={s} and you take action={action}, "
+                            f"what is the probability of entering state={states[0]}? "
+                        ).strip()
+
+                        p_float = float(probability)
+                        
+                        # Probability must be in [0, 1]
+                        if not (0 <= p_float <= 1):
+                            raise ValueError("Probability must be between 0 and 1.")
+
+                        # The sum for 2 states is forced to 1
+                        # state[1] = 1 - p_float
+                        p_complement = 1.0 - p_float
+                        if not (0 <= p_complement <= 1):
+                            raise ValueError(
+                                "Calculated complement is not between 0 and 1, "
+                                "check your value."
+                            )
+
+                        # If all checks pass, store the result
+                        temp2 = {
+                            states[0]: p_float,
+                            states[1]: p_complement,
+                        }
+                        temp[index] = temp2
+                        break  # exit the while loop
+                    except ValueError as e:
+                        print(f"Invalid input: {e}")
+                
+            probabilities[s] = temp
+
+    else:
+        for s in states:
+            temp = {}
+            for index, action in enumerate(actions):
+                while True:
+                    # gather probabilities for all next-states in a loop
+                    temp2 = {}
+                    valid = True
+                    total_probability = 0.0
+
+                    for s_prime in states:
+                        prob_input = input(
+                            f"If in state={s} and you take action={action}, "
+                            f"what is the probability of entering state={s_prime}? "
+                        ).strip()
+
+                        try:
+                            p_float = float(prob_input)
+                            if not (0 <= p_float <= 1):
+                                raise ValueError("Probability must be between 0 and 1.")
+                            temp2[s_prime] = p_float
+                            total_probability += p_float
+                        except ValueError as e:
+                            print(f"Invalid input for transition to {s_prime}: {e}")
+                            valid = False
+                            break  # break out of the s_prime loop
+
+                    if not valid:
+                        print("Retry entering probabilities for this action.\n")
+                        continue
+
+                    # Now check if sum of probabilities is 1
+                    # (we allow a small tolerance, e.g. 1e-8)
+                    if abs(total_probability - 1.0) > 1e-8:
+                        print(
+                            f"The sum of the probabilities you entered is "
+                            f"{total_probability:.5f}, which does not equal 1. "
+                            "Please re-enter.\n"
+                        )
+                        continue
+
+                    # If we get here, everything is valid (i hope)
+                    temp[index] = temp2
+                    break  # break from the while loop for this action
+
+            probabilities[s] = temp
+
+    print("\nFinal Probabilities Dictionary:\n", probabilities)
+    rewards = {}
+
+
+    for s in states:
+        temp = {}
+        for index, action in enumerate(actions):
+            while True:
+                reward_str = input(
+                    f"If in state = {s} and you take action = {action}, what is the reward? "
+                ).strip()
+                try:
+                    reward_val = float(reward_str)
+                except ValueError:
+                    print("Invalid input. Please enter a valid float.")
+                    continue  # prompt again
+                
+                # If we get here, parsing succeeded
+                temp2 = {}
+                # set these for all values further down the tree: 
+                for i in range(len(states)):
+                    temp2[states[i]] = reward_val
+
+                # Store it in the dictionary for this (state, action)
+                temp[index] = temp2
+                break  # break the while loop, move to the next action
+
+        # Finally, store the dictionary for this state
+        rewards[s] = temp
+
+    # Debug print
+    print("\nFinal Rewards Dictionary:")
+    print(rewards)
+    # Get max iterations (positive integer)
+    max_iterations_validity = False
+    while not max_iterations_validity:
+        max_iterations = input("Enter the maximum number of iterations (positive integer): ").strip()
+        try:
+            max_iterations = int(max_iterations)
+            if max_iterations > 0:
+                max_iterations_validity = True
+            else:
+                print("Must be a positive integer.")
+        except ValueError:
+            print("Invalid input. Enter a positive integer.")
+
+    # Get tolerance (small positive float)
+    tolerance_validity = False
+    while not tolerance_validity:
+        tolerance = input("Enter the solver tolerance (e.g., 1e-6): ").strip()
+        try:
+            tolerance = float(tolerance)
+            if tolerance > 0:
+                tolerance_validity = True
+            else:
+                print("Tolerance must be a positive number.")
+        except ValueError:
+            print("Invalid input. Enter a small positive float (e.g., 0.00001 or 1e-5).")
+
+    # Get discount rate
+    discount_rate_validity = False
+    while not discount_rate_validity:
+        discount_rate = input("Enter the discount rate (0 ≤ γ < 1): ").strip()
+        try:
+            discount_rate = float(discount_rate)
+            if 0 <= discount_rate < 1:
+                discount_rate_validity = True
+            else:
+                print("Discount rate must be in the range [0, 1).")
+        except ValueError:
+            print("Invalid input. Enter a float between 0 and 1 (e.g., 0.9).")
+    print('\n Extracted policy is: ')
+    print('\n')
+    solver = GenericMDP(states = states, 
+                        actions = actions, 
+                        probabilities = probabilities, 
+                        rewards = rewards, 
+                        discount_rate = discount_rate, 
+                        max_iterations = max_iterations)()
 
