@@ -22,5 +22,11 @@ dependencies = [
     "numpy", "matplotlib",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [project.urls]
 homepage = "https://github.com/Harry-Ell/601-assessment-2"
+
+[tool.setuptools.packages.find]
+where = ["."]
