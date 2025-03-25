@@ -31,4 +31,4 @@ Value_Iteration()
 
 Following a successful solving, it returns a plot of the policy obtained.
 
-![CLI_grid_pol](figures/gridworld.PNG)
+![CLI_grid_pol](figures/gridworld.png)
