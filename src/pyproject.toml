@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "value_iteration"
-version = "1.0.0"
+version = "1.0.1"
 maintainers = [
   { name="Harry Ellingham", email="h.ellingham@lancaster.ac.uk" },
 ]
@@ -23,6 +23,8 @@ dependencies = [
     "numpy>=2.2",
     "matplotlib>=3.10",
 ]
+
+readme = { file = "pypi.md", content-type = "text/markdown" }
 
 [project.optional-dependencies]
 dev = ["pytest"]
