@@ -1,3 +1,14 @@
+'''
+This script is just a wrapper for other functions, MDP.py and Gridworld_Constructor.py.
+
+It is about 400 lines of try/except and while conditions. Not expecting this to be 
+read at all. The CLI seemed like a fun idea, but turned out to be far more hassle than it's 
+worth.
+
+If it is alright, I would prefer if this did not form part of the assessment. Code here is neither 
+commented nor written nicely in all honesty.  
+'''
+
 import ast
 
 from .Gridworld_Constructor import Gridworld_Constructor

@@ -1,13 +1,25 @@
+'''
+Class object which contains all the helper functions in order to populate all of the multilayer 
+dictionaries in the case of gridworld problems. 
+
+This took a large number of lines of code to make this work. Its a huge overhead, but I do believe 
+we are left with just about the fastest way to loop through the value iteration. Perhpas there is 
+some clever way to vectorise the operations inside of some high perfomance library such as within 
+numpy. If there is, staying in numpy would likely outperform most things done in base python. 
+'''
+
 class Gridworld_Constructor:
-    '''here we can contain all of the helper functions which will allow us to make the transition matricies we need'''
+    '''here we can contain all of the helper functions which will allow us to make the transition 
+    matricies we need'''
     def __init__(self, 
-                 reward_states, 
-                 reward_values, 
-                 probability_of_intended_move, 
-                 len_x, 
-                 len_y, 
-                 border_penalty,
+                 reward_states:list[tuple], 
+                 reward_values:list[int], 
+                 probability_of_intended_move:float, 
+                 len_x:int, 
+                 len_y:int, 
+                 border_penalty:float,
                  ):
+        
         self.border_penalty = border_penalty
         self.reward_states = reward_states
         self.reward_values = reward_values
@@ -22,7 +34,17 @@ class Gridworld_Constructor:
                        (0, -1)]   # down
 
 
-    def _populate_probabilities_rewards(self, state):
+    def _populate_probabilities_rewards(self, state:tuple)->dict:
+        '''
+        Takes in a state, and if it is in a corner it builds in transitions to the 
+        corners for you. 
+
+        Args:
+            state (tuple): Current state which is a +ve reward cell
+
+        Returns:
+            sub_dirs (dict): set of action/state lookup dictionaries. 
+        '''
         sub_dirs = {}
         for index, _ in enumerate(self.actions):
             sub_dirs[index] = {}
@@ -30,16 +52,36 @@ class Gridworld_Constructor:
                 sub_dirs[index][(corner)] = 0.25
         return sub_dirs
 
-    def _populate_probabilities_usual(self, state):
+    def _populate_probabilities_usual(self, state:tuple)->dict:
+        '''
+        Takes in a state, and encodes probabilities of moving in intended direction or
+        random one.
+
+        Args:
+            state (tuple): Current state which is a +ve reward cell
+
+        Returns:
+            sub_dirs (dict): set of action/state lookup dictionaries. 
+        '''
         sub_dirs = {}
         for index, intended_move in enumerate(self.actions):
             sub_dirs[index] = {}
             for actual_move in self.actions:
-                value = 0.7 if intended_move == actual_move else 0.1
+                value = self.accuracy if intended_move == actual_move else (1-self.accuracy)/3
                 sub_dirs[index][(state[0] + actual_move[0], state[1] + actual_move[1])] = value
         return sub_dirs
 
-    def _populate_probabilities_edge(self, state):
+    def _populate_probabilities_edge(self, state:tuple)->dict:
+        '''
+        Takes in a state, and encodes probabilities of moving in intended direction or
+        random one. If you move into the border, this keeps you in the same location. 
+
+        Args:
+            state (tuple): Current state which is a +ve reward cell
+
+        Returns:
+            sub_dirs (dict): set of action/state lookup dictionaries. 
+        '''
         sub_dirs = {}
 
         for index, intended_move in enumerate(self.actions):
@@ -62,7 +104,16 @@ class Gridworld_Constructor:
 
         return sub_dirs
 
-    def _populate_positive_rewards(self, state, reward_value):
+    def _populate_positive_rewards(self, state:tuple, reward_value:float)->dict:
+        '''
+        Takes in a state, and adds in the rewards for leaving/ entering
+
+        Args:
+            state (tuple): Current state which is a +ve reward cell
+
+        Returns:
+            sub_dirs (dict): set of action/state lookup dictionaries. 
+        '''
         sub_dirs = {}
         for index, _ in enumerate(self.actions):
             sub_dirs[index] = {}
@@ -70,7 +121,16 @@ class Gridworld_Constructor:
                 sub_dirs[index][(corner)] = reward_value
         return sub_dirs
 
-    def _populate_negative_rewards(self, state, reward_value):
+    def _populate_negative_rewards(self, state:tuple, reward_value:float)->dict:
+        '''
+        Takes in a state, and adds in the rewards for leaving/ entering
+
+        Args:
+            state (tuple): Current state which is a +ve reward cell
+
+        Returns:
+            sub_dirs (dict): set of action/state lookup dictionaries. 
+        '''
         sub_dirs = {}
         for index, _ in enumerate(self.actions):
             sub_dirs[index] = {}
@@ -79,7 +139,16 @@ class Gridworld_Constructor:
         return sub_dirs
 
 
-    def _populate_edge_penalties(self, state):
+    def _populate_edge_penalties(self, state:tuple)->dict:
+        '''
+        Takes in a state, and adds in the rewards for leaving/ entering
+
+        Args:
+            state (tuple): Current state which is a +ve reward cell
+
+        Returns:
+            sub_dirs (dict): set of action/state lookup dictionaries. 
+        '''
         sub_dirs = {}
 
         for index, _ in enumerate(self.actions):

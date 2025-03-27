@@ -1,22 +1,42 @@
+'''
+Python implementation of a Markov decision process solving algorithm. 
+The specific algorithm is called value iteration, and the README.md file 
+on the repositiory goes into a lot more detail on this. 
+
+Makes use of a three tier dictionary for O(1) lookup time for all states. 
+By this, I mean the arrays probabilities[state][action][s_prime], and 
+rewards[state][action][s_prime] contain nested dictionaries. 
+
+Constructing these inputs is done with via a command line interface, where
+a series of questions filter you down to providing all the required 
+information about the states, actions and associated probabilities. 
+
+Additional functionalities include returning a plot of the optimal policy 
+in the case of a gridworld problem 
+
+'''
+
 import numpy as np 
 import matplotlib.pyplot as plt
 
 
 class GenericMDP:
-
+    '''
+    
+    '''
     def __init__(self, 
-                 states, 
-                 actions, 
-                 probabilities, 
-                 rewards, 
-                 discount_rate, 
-                 max_iterations,
-                 tolerance = 1e-6, 
-                 len_x = None, 
-                 len_y = None, 
-                 reward_list = None, 
-                 reward_values = None, 
-                 problem_type = 'generic'):
+                 states:list[tuple], 
+                 actions:list[tuple], 
+                 probabilities:dict[dict[dict]], 
+                 rewards:dict[dict[dict]], 
+                 discount_rate:float, 
+                 max_iterations:int,
+                 tolerance:float = 1e-6, 
+                 len_x:int = None, 
+                 len_y:int = None, 
+                 reward_list:list[tuple] = None, 
+                 reward_values:list[int] = None, 
+                 problem_type:str = 'generic'):
 
         self.tolerance = tolerance
         self.states = states
@@ -26,21 +46,27 @@ class GenericMDP:
         self.max_iter = max_iterations
         self.rewards_dict = rewards
         self.problem_type = problem_type
-
-        if self.problem_type == 'gridworld':
-            self.len_x = len_x
-            self.len_y = len_y
-            self.rewards_list = reward_list
-            self.rewards_list = reward_list
-            self.reward_values = reward_values
+        self.len_x = len_x
+        self.len_y = len_y
+        self.rewards_list = reward_list
+        self.rewards_list = reward_list
+        self.reward_values = reward_values
 
 
 
-    def _bellmans_eq(self, state, values_dict:dict, extract_policy = False):
+    def _bellmans_eq(self, state:tuple, values_dict:dict, extract_policy:bool = False)->float:
         '''
-        This will be a generic bellmans which takes in the probabilities, rewards and states
-        
-        intentionally sparse for the time being to avoid wasted computation
+        This is a generic implementation of the Bellmans equation as found in textbook 
+        linked in the repository. 
+        Args:
+            state (tuple): Current state for which we are updating the value of .
+            values_dict (dict): Dictionary of all of the current values.
+            extract_policy (bool): Flag to determine if you are ready to learn the policy. 
+                this is only called at the end of the process to minimise wasted computation. 
+
+        Returns:
+            V_k (float): Updated value of V_k
+
         '''
 
         action_space = len(self.actions)
@@ -57,11 +83,12 @@ class GenericMDP:
         else:
             return np.where(V_k == max(V_k))
 
-    def _value_iteration(self):
+    def _value_iteration(self)-> dict:
         '''
-        value iteration function which we have to 
-        
-        soon, this will need termination conditions
+        Value iteration algorithm. 
+
+        Returns:
+            V_k (dict): Final array of values for all the states
         '''
 
         V_k = {}   
@@ -80,38 +107,34 @@ class GenericMDP:
         print(f'Tolerance of {self.tolerance} was not met after {self.max_iter} iterations. Terminating now.')
         return V_k
     
-    def _extract_policy_gridworld(self):
+    def _extract_policy(self):
         '''
-        Description: 
-            We will only do this once as to reduce computational load on the solver
-        Inputs: 
-            Value function
+        We will only do this once as to reduce computational load on the solver. 
+        Depending on whether we have a generic problem or a large, grid based one, we 
+        will or will not decide to print all the actions.  
+
+        Args: 
+            self: all objects attributes stored in self
         Returns: 
-            Policy
+            Policy: rule for every state
         '''
         Values = self.values
         policy = {}
         for state in self.states:
             policy[state] = self._bellmans_eq(state = state, values_dict = Values, extract_policy=True)
-        return policy
-    
-    def _extract_policy_generic(self):
-        '''
-        Description: 
-            We will only do this once as to reduce computational load on the solver
-        Inputs: 
-            Value function
-        Returns: 
-            Policy
-        '''
-        Values = self.values
-        policy = {}
-        for state in self.states:
-            policy[state] = self._bellmans_eq(state = state, values_dict = Values, extract_policy=True)
-            print(f'If in state: {state}, the optimal action is: {self.actions[int(policy[state][0][0])]}')
+            if self.problem_type == 'generic':
+                print(f'If in state: {state}, the optimal action is: {self.actions[int(policy[state][0][0])]}')
         return policy
 
     def _policy_plotter(self):
+        '''
+        Description: 
+            We will only do this once as to reduce computational load on the solver
+        Inputs: 
+            self
+        Returns: 
+            Plot of policy in the case of grid world examples. 
+        '''
         arrow_map = {
             0: (0,  1),   # Up
             1: (0, -1),   # Down
@@ -145,7 +168,6 @@ class GenericMDP:
 
         plt.quiver(Y, X, V, U, pivot='middle', scale=1, scale_units='xy', angles='xy')
 
-        #plt.gca().invert_yaxis() 
         plt.xticks(np.arange(rows))
         plt.yticks(np.arange(cols))
         plt.grid(True)
@@ -155,12 +177,14 @@ class GenericMDP:
 
 
     def __call__(self):
-        '''call funciton'''
+        '''
+        Call funciton, allowing us to interact with instances of the class like a function. 
+        '''
         self.values = self._value_iteration()
         if self.problem_type == 'gridworld':
-            self.policy = self._extract_policy_gridworld()
+            self.policy = self._extract_policy()
             self._policy_plotter()
         else:
-            self.policy = self._extract_policy_generic()
+            self.policy = self._extract_policy()
 
         return self.policy, self.values

@@ -1,8 +1,14 @@
 """
-Python test file for exercise 9.27
+Python test file for exercise 9.28
 
 For 9.28, we need to write out all the probabilities and input these to run the function. 
 There is actually a large amount of overhead to doing this, hence this is going to be a very long test. 
+
+Alongside this, we will also have to save the arrays we will be comparing to. I suppose I could have 
+done this by importing files to compare, but this was more convenient at the time. 
+
+I had the option of importing the class and calling the populate_... functions from it, but i worried 
+this could lead to unintended consequences, such as if this is the point of failure you wouldn't catch it
 """
 
 import numpy as np

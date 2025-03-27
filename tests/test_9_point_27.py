@@ -1,9 +1,14 @@
 """
 Python test file for exercise 9.27
+
+Here, to make it absolutely foolproof i also opted to paste in the target policy 
+and also the values. We will compare rounded versions of the values to avoid issues 
+caused by floating point errors if ran on different machines. 
+
 """
 import numpy as np
 from numpy.testing import assert_array_equal
-from value_iteration.MDP import GenericMDP #type: ignore
+from value_iteration.MDP import GenericMDP # type:ignore
 
 # for 9.27, we simply write out what we know the tarket policy should be 
 def test_ex_9_27():
@@ -14,12 +19,12 @@ def test_ex_9_27():
     actions = ['Relax', 'Party']
     probabilities = {'Healthy': {0: {'Healthy': 0.95, 'Sick': 0.05},
                                  1: {'Healthy': 0.7, 'Sick': 0.300}},
-                    'Sick':     {0: {'Healthy': 0.5, 'Sick': 0.5}, 
+                        'Sick': {0: {'Healthy': 0.5, 'Sick': 0.5}, 
                                  1: {'Healthy': 0.1, 'Sick': 0.9}}}
     
     rewards = {'Healthy': {0: {'Healthy': 10.0, 'Sick': 10.0},
                            1: {'Healthy': 7.0, 'Sick': 7.0}},
-               'Sick':    {0: {'Healthy': 0.0, 'Sick': 0.0}, 
+                  'Sick': {0: {'Healthy': 0.0, 'Sick': 0.0}, 
                            1: {'Healthy': 2.0, 'Sick': 2.0}}}
     
     target_policy = {'Healthy': (np.array([0]),), 'Sick': (np.array([0]),)}
