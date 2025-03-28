@@ -9,7 +9,7 @@ In this package, we provide an implementation of a value iteration solving algor
 
 #### installing from github with pip
 
-    python -m pip install git+https://github.com/Harry-Ell/601-assessment-2.git#subdirectory=src
+    python -m pip install git+https://github.com/Harry-Ell/609-assessment-2.git#subdirectory=src
 
 
 ## Example 1: Solving problem 9.27 from  [Artificial Intelligence: Foundations and Computational Agents 2nd edition](https://artint.info/2e/html2e/ArtInt2e.html)
